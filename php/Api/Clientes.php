@@ -122,4 +122,14 @@ class Superlogica_Api_Clientes extends Superlogica_Api_Abstract {
 
     }
     
+    /**
+     * Retorna a url para alteração da forma de pagamento do cliente
+     * 
+     * @param string $callback URL utilizada pelo aplicativo para redirecionar após o cliente escolher a forma de pagamento
+     * @return string
+     */
+    public function getUrlFormaDePagamento( $callback ){
+        return $this->_api->getUrlApplication('areadocliente') . '/clientes/formadepagamento?menu=0&alterar=1&callback=' . $callback;
+    }
+    
 }
