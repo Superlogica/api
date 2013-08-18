@@ -49,14 +49,34 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
      * @param float $valorUnitario Valor do unitário do item
      * @param int $conta ID da conta bancária a qual este item será gerada     
      * @param string $dataInicio Data de inicio do item recorrente no padrão m/d/Y
-     * @param int OPCIONAL $periodicidade Periodicidade do item ( 0 = mensal, 1=bimestral, 2=trimestral, 3=semestral, 4=anual )
+     * @param int OPCIONAL $periodicidade Periodicidade do item ( 30 = mensal, 60=bimestral, 90=trimestral, 180=semestral, 365=anual )
      * @param int OPCIONAL $quantidade Quantidade do item ( será multiplicado sempre Qtd*VlUnit )
      * @param string OPCIONAL $complemento Complemento do item recorrente
      * @param string $dataFim Data de fim do item recorrente no padrão m/d/Y
      * @return int ID do item recorrente inserido
      * @throws Exception
      */
-    public function novaRecorrente( $identificadorDoCliente, $servico, $valorUnitario, $conta, $dataInicio, $periodicidade = 0,  $quantidade = 1, $complemento = null, $dataFim = null){
+    public function novaRecorrente( $identificadorDoCliente, $servico, $valorUnitario, $conta, $dataInicio, $periodicidade = 30,  $quantidade = 1, $complemento = null, $dataFim = null){
+        
+        switch ( $periodicidade ){
+            case 30:
+                $periodicidade=0;
+                break;
+            case 60:
+                $periodicidade=1;
+                break;
+            case 90:
+                $periodicidade=2;
+                break;
+            case 180:
+                $periodicidade=3;
+                break;
+            case 365:
+                $periodicidade=4;
+                break;
+            default:
+                throw new Exception('Períodicidade "'.$periodicidade.'" inválida. Aceita somente 30,60,90,180 e 365 dias.');
+        }
         
         $dados[] = array(
             'DT_INICIO_MENS' => $dataInicio,
