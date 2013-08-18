@@ -9,7 +9,10 @@ class Superlogica_Api_Contatos extends Superlogica_Api_Abstract{
      * @param string $email
      * @return string
      */
-    public function loginViaToken( $email, $urlApplication ){
+    public function loginViaToken( $email, $urlApplication = null ){
+        if ( !$urlApplication )
+            $urlApplication = $this->_api->getUrlApplication('areadocliente');
+        
         $retorno = $this->_api->action('sacados/token', array( 'email' => $email ) );
         $token = $retorno['data']['token'];
         if ( !$token )
