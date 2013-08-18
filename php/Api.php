@@ -20,6 +20,12 @@ class Superlogica_Api {
      * @var string
      */
     protected $_session = '';
+    
+    /**
+     * Armazena o nome da licença utilizada
+     * @var string
+     */
+    protected $_licenca = '';
 
     /**
      * Constructor
@@ -50,6 +56,7 @@ class Superlogica_Api {
         $params['username'] = $usuario;
         $params['password'] = $senha;
         $params['filename'] = $licenca;
+        $this->_licenca = $licenca;
         $retorno = $this->action('auth/post', $params);
         if ($retorno['status'] == 202) 
             $this->_session = $retorno['session'];
@@ -153,6 +160,13 @@ class Superlogica_Api {
         
         throw new Exception( $msg, $response['status'] );
     }
-
+    
+    /**
+     * Retorna a url do aplicativo que está sendo utilizado
+     * @return string
+     */
+    public function getUrlApplication( $app ){
+        return 'https://'.$this->_licenca.'.superlogica.net/clients/' . $app;
+    }
 }
 
