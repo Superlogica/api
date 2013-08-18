@@ -88,11 +88,12 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
      * @param string $complemento
      * @return void
      */
-    public function nova( $servico, $valorUnitario, $quantidade = 1, $complemento = null ){
+    public function nova( $servico, $valorUnitario, $quantidade = 1, $complemento = null, $idMensalidade= null ){
         $dados = array(
             'VL_UNITARIO_PRD' => $valorUnitario,
             'NM_QUANTIDADE_PRD' => $quantidade,
-            'ST_COMPLEMENTO_COMP' => $complemento
+            'ST_COMPLEMENTO_COMP' => $complemento,
+            'ID_MENSALIDADE_COMP' => $idMensalidade
         );
         $dados[ self::getUtilizarIdentificador() ? 'ST_SINCRO_PRD' : 'ID_PRODUTO_PRD'] = $servico;
         
@@ -110,7 +111,7 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
      * @param float $desconto
      * @param string $obsInterna
      * @param string $obsParaCliente
-     * @return int Retorna o id da cobrança gerada
+     * @return array Informações da cobrança gerada incluindo link de segunda via
      */
     public function gerar( $identificadorDoCliente, $vencimento, $conta, $juros=null, $multa=null, $desconto = 0, $obsInterna = '', $obsParaCliente = '' ){        
         $dados = $this->_getDadosCobranca( $identificadorDoCliente, $vencimento, $conta, $juros, $multa, $desconto , $obsInterna , $obsParaCliente );                
@@ -144,7 +145,7 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
         $response = $this->_api->action('cobranca/put', $dados );
         
         if ( $response['status'] == 200 )
-            return $response['data'][0]['data']['id_recebimento_recb'];
+            return $response['data'][0]['data'];
         
         $this->_api->throwException($response);
     }

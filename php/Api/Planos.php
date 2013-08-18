@@ -21,24 +21,4 @@ class Superlogica_Api_Planos extends Superlogica_Api_Abstract {
         
     }
     
-    /**
-     * Verifica se uma mensalidade está contratado por um cliente
-     * 
-     * @param string|int $identificador Identificador do cliente
-     * @param string $identificadorServico Identificador do serviço
-     * @return boolean
-     */
-    public function contratado( $identificador, $identificadorServico ){
-        
-        $dados[ self::getUtilizarIdentificador() ? 'identificador' : 'ID_SACADO_SAC'] = $identificador;
-        $dados[ self::getUtilizarIdentificador() ? 'identificadorServico' : 'ID_PRODUTO_PRD'] = $identificadorServico;
-        
-        $retorno = $this->_api->action("mensalidades/contratada", $dados);
-        if ( $retorno['status'] != 200 )
-            $this->_api->throwException($retorno);
-        
-        return count($retorno['data'][0]['data']) ? true : false;
-
-    }
-    
 }

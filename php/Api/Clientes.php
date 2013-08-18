@@ -12,7 +12,7 @@ class Superlogica_Api_Clientes extends Superlogica_Api_Abstract {
      */
     public function novo( $identificador, $dados ){
         
-        $dados[ self::getUtilizarIdentificador() ? 'ST_SINCRO_SAC' : 'ID_SACADO_SAC' ] = $identificador;
+        $dados['ST_SINCRO_SAC'] = $identificador;
         
 
         $response = $this->_api->action('sacados/put', $dados );
@@ -84,19 +84,42 @@ class Superlogica_Api_Clientes extends Superlogica_Api_Abstract {
      */
     public function inadimplente( $identificador, $diasTolerancia = 0 ){
         
-        $dados[ self::getUtilizarIdentificador() ? 'identificador' : 'ID_SACADO_SAC'] = $identificador;
+        $dados[ self::getUtilizarIdentificador() ? 'identificador' : 'CLIENTES[0]'] = $identificador;
         
-        $diasTolerancia = $diasTolerancia+1;
+        $diasTolerancia = $diasTolerancia;
         $timestampVencimentoFim = strtotime('-'. ($diasTolerancia).' day', mktime(0,0,0) );        
-        $dados['dtFim'] = date('m/d/Y', $timestampVencimentoFim );
+        $dados['posicaoEm'] = date('m/d/Y', $timestampVencimentoFim );
         
-        $retorno = $this->_api->action('cobranca/index', $dados );
-                
-        if ( $retorno['status'] != 200 || count($retorno['data']) > 0 )
+        $retorno = $this->_api->action('inadimplencia/index', $dados );
+
+        if ( $retorno['status'] != 200 )
+            $this->_api->throwException( $retorno );
+        
+        if ( count($retorno['data']) > 0 )
             return true;
         
         return false;
         
+    }
+    
+    /**
+     * Verifica se uma mensalidade está contratado por um cliente
+     * 
+     * @param string|int $identificador Identificador do cliente
+     * @param string $identificadorServico Identificador do serviço
+     * @return boolean
+     */
+    public function contratado( $identificador, $identificadorServico ){
+        
+        $dados[ self::getUtilizarIdentificador() ? 'identificador' : 'ID_SACADO_SAC'] = $identificador;
+        $dados[ self::getUtilizarIdentificador() ? 'identificadorServico' : 'ID_PRODUTO_PRD'] = $identificadorServico;
+        
+        $retorno = $this->_api->action("mensalidades/contratada", $dados);
+        if ( $retorno['status'] != 200 )
+            $this->_api->throwException($retorno);
+        
+        return count($retorno['data'][0]['data']) ? true : false;
+
     }
     
 }
