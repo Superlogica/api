@@ -101,7 +101,7 @@ class Superlogica_Api {
      * @param boolean $upload  usado para enviar arquivos
      * @return array
      */
-    public function action($action, $params, $upload = false) {
+    public function action($action, $params = array(), $upload = false) {
 
         if ($this->_curl == null) {
             $this->_curl = curl_init();
@@ -132,7 +132,7 @@ class Superlogica_Api {
         }
         $result = curl_exec($this->_curl);              
         if (($result[0] == '{') or ($result[0] == '[')) {
-            $result = json_decode($result, true);
+            $result = Superlogica_Utf8::encode( json_decode($result, true) );
             $result['url'] = $this->_url . '/' . $action;
             return $result;
         }
