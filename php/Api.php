@@ -132,7 +132,7 @@ class Superlogica_Api {
         }
         $result = curl_exec($this->_curl);              
         if (($result[0] == '{') or ($result[0] == '[')) {
-            $result = Superlogica_Utf8::encode( json_decode($result, true) );
+            $result = json_decode($result,true);
             $result['url'] = $this->_url . '/' . $action;
             return $result;
         }
