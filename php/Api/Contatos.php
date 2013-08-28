@@ -1,5 +1,7 @@
 <?php
 
+require_once( dirname(__FILE__) . '/Abstract.php' );
+
 class Superlogica_Api_Contatos extends Superlogica_Api_Abstract{
         
     /**
