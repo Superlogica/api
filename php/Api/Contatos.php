@@ -14,15 +14,24 @@ class Superlogica_Api_Contatos extends Superlogica_Api_Abstract{
     public function loginViaToken( $email, $urlApplication = null ){
         if ( !$urlApplication )
             $urlApplication = $this->_api->getUrlApplication('areadocliente');
-        
-        $retorno = $this->_api->action('sacados/token', array( 'email' => $email ) );
-        $token = $retorno['data']['token'];
-        if ( !$token )
-            $this->_api->throwException($retorno);    
+        $token = $this->getToken( $email );
         $urlParamSeparator = '?';
         if (strpos($urlApplication, '?') !== false )
             $urlParamSeparator = '&';
         return $urlApplication.$urlParamSeparator.'token='.$token;
     }
     
+    /**
+     * Gera um token de acesso ao e-mail informado
+     * @param string $email
+     * @return string
+     * @throw Exception
+     */
+    public function getToken( $email ){
+        $retorno = $this->_api->action('sacados/token', array( 'email' => $email ) );
+        $token = $retorno['data']['token'];
+        if ( !$token )
+            $this->_api->throwException($retorno);
+        return $token;
+    }
 }
