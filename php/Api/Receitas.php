@@ -22,7 +22,7 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
      * @return int ID do item eventual inserido
      * @throws Exception
      */
-    public function novaEventual( $identificadorDoCliente, $dataReferencia, $conta, $servico, $valor, $quantidade = 1, $complemento = null ){
+    public function novaEventual( $identificadorDoCliente, $dataReferencia, $conta, $servico, $valor, $quantidade = 1, $complemento = null, $identificadorComposicao = null ){
 
         $dados = array(
             'ST_MESANO_COMP' => $dataReferencia,
@@ -34,6 +34,9 @@ class Superlogica_Api_Receitas extends Superlogica_Api_Abstract {
         
         $dados[ self::getUtilizarIdentificador() ? 'ST_SINCROSAC_COMP' : 'ID_SACADO_COMP'] = $identificadorDoCliente;
         $dados[ self::getUtilizarIdentificador() ? 'ST_SINCRO_PRD' : 'ID_PRODUTO_PRD'] = $servico;
+        
+        if ( $identificadorComposicao )
+            $dados['ST_SINCRO_COMP'] = $identificadorComposicao;
         
         $response = $this->_api->action("composicao/put", $dados );
         if ( $response['status'] == 200 )
