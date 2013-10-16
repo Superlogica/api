@@ -26,7 +26,9 @@ class Superlogica_Api {
      * @var string
      */
     protected $_licenca = '';
-
+    
+    protected $_retorno = null;
+    
     /**
      * Constructor
      *
@@ -39,7 +41,6 @@ class Superlogica_Api {
     }
 
     public function setSessionId($sessionId){
-        session_write_close();
         $this->_session = $sessionId;
     }
 
@@ -102,7 +103,7 @@ class Superlogica_Api {
      * @return array
      */
     public function action($action, $params = array(), $upload = false) {
-
+        $this->_retorno = null;
         if ($this->_curl == null) {
             $this->_curl = curl_init();
             curl_setopt($this->_curl, CURLOPT_RETURNTRANSFER, true);
@@ -121,7 +122,7 @@ class Superlogica_Api {
                 $params = array();
                 $params[0] = $tempParams;
             }
-            $_params['json'] = json_encode(array('params' => $params));
+            $_params['json'] = json_encode(array('params' => $params ));
         }
             
         curl_setopt($this->_curl, CURLOPT_URL, $this->_url . '/' . $action);
@@ -132,8 +133,9 @@ class Superlogica_Api {
         }
         $result = curl_exec($this->_curl);              
         if (($result[0] == '{') or ($result[0] == '[')) {
-            $result = json_decode($result,true);
+            $result = json_decode($result, true);
             $result['url'] = $this->_url . '/' . $action;
+            $this->_retorno = $result;
             return $result;
         }
 
@@ -145,7 +147,10 @@ class Superlogica_Api {
      * @throw Exception
      * @param array $response
      */
-    public function throwException($response){
+    public function throwException( $response = null ){
+        
+        if ( $response === null )
+            $response = $this->_retorno;
         
         $msg = $response['msg'];
         if ( $response['data'][0]['msg'] ){
@@ -168,5 +173,84 @@ class Superlogica_Api {
     public function getUrlApplication( $app ){
         return 'https://'.$this->_licenca.'.superlogica.net/clients/' . $app;
     }
+    
+    /**
+     * Retorna o data do result passado
+     * Utilizado no caso de multiple response e é ncessário apenas o primeiro item da requisição
+     * 
+     * FUNCIONANDO COMO NO JS_REQUEST 
+     * 
+     * @param array|int $retornoOuIndice um array de retorno ou o índice do data a ser retornado
+     * @return array
+     */
+    public function getData( $retornoOuIndice = '0' ){   
+        
+        // Mantendo compatibilidade com código anterior
+        if ( is_array($retornoOuIndice) ){
+            if ( is_array( $retornoOuIndice['data'] ) && $retornoOuIndice['data'][0]['data'] )
+                return $retornoOuIndice['data'][0]['data'];
+            return $retornoOuIndice['data'];
+        }
+        
+        $dados = array();
+        if ( $retornoOuIndice == -1 ){
+        	
+            $dados = $this->_retorno['data'];
+
+        }else if ( ( is_array($this->_retorno['data']) ) && ( is_array($this->_retorno['data'][$retornoOuIndice]) ) && ( $this->_retorno['data'][$retornoOuIndice]["data"] ) ){
+        	
+            $dados = $this->_retorno['data'][$retornoOuIndice]["data"];
+
+        }else if ( is_array($this->_retorno['data'][$retornoOuIndice]) ){
+        	
+            $dados = $this->_retorno['data'][$retornoOuIndice];
+            
+        }
+        
+        return $dados;
+        
+        
+    }
+    
+    /**
+     * Retorna o status da requisição
+     * @return int
+     */
+    public function getStatus(){
+        
+        $status = 500;
+        if ( is_array($this->_retorno) ){
+            $status = $this->_retorno['status'];
+            if ( count($this->_retorno['data']) == 1 && $this->_retorno['data'][0]['status']){
+                $status = $this->_retorno['data'][0]['status'];
+            }
+        }
+        return $status;
+
+    }
+    
+    /**
+     * Retorna a msg da requisição
+     * @return string
+     */
+    public function getMsg(){
+        $msg = $this->_retorno;
+        if ( is_array($this->_retorno) ){
+            $msg = $this->_retorno['msg'];
+            if ( count($this->_retorno['data']) == 1 && $this->_retorno['data'][0]['msg']){
+                $msg = $this->_retorno['data'][0]['msg'];
+            }
+        }
+        return $msg;
+    }
+    
+    /**
+     * Verifica se a requisição é válida
+     * @return bool
+     */
+    public function isValid(){
+        return ($this->_retorno) && ( $this->_retorno['status'] < 299 ) && ($this->_retorno['status'] != 0);
+    }
+            
 }
 
