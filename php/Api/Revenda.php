@@ -209,8 +209,7 @@ class Superlogica_Api_Revenda {
             
         $retorno = $this->_apiAreadocliente->action('publico/auth',array(
             'email' => $this->_credencialEmail,
-            'senha' => $this->_credencialSenha,
-            'filename' => 'financeiroteste'
+            'senha' => $this->_credencialSenha
         ));
         
         if ( $retorno['status'] != 202 ){
