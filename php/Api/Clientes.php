@@ -65,14 +65,13 @@ class Superlogica_Api_Clientes extends Superlogica_Api_Abstract {
             'QUANT_PARCELAS_ADESAO' => $parcelasAdesao
         );
         $params[ self::getUtilizarIdentificador() ? 'identificador' : 'ID_SACADO_SAC'] = $identificador;
-        $response = $this->_api->action('planosclientes/put', array("PLANOS" => array($params) ), true );
+        $this->_api->action('planosclientes/put', array("PLANOS" => array($params) ) );
         
-        print_r( $response );
-        exit;
+        if ( $this->_api->getStatus() == 200 ){
+            $resposta = $this->_api->getData();
+            return $resposta['st_identificador_plc'];
+        }
         
-        if ( $response['status'] == 200 )
-            return true;
-
         $this->_api->throwException( $response );
         
     }
