@@ -27,7 +27,18 @@ class Superlogica_Api {
      */
     protected $_licenca = '';
     
+    /**
+     * Armazena o retorna da ultima requisição
+     * Utilizado nas outras funções como getData, getMsg e getStatus
+     * @var array
+     */
     protected $_retorno = null;
+    
+    /**
+     * Arquivo de debug
+     * @var string
+     */
+    protected $_debugFile = null;
     
     /**
      * Constructor
@@ -40,6 +51,18 @@ class Superlogica_Api {
         return $this;
     }
 
+    /**
+     * Seta o arquivo de debug
+     * @param type $file
+     */
+    public function setDebugFile( $file ){
+        $this->_debugFile = $file;
+    }
+    
+    /**
+     * Seta o id da sessão
+     * @param string $sessionId
+     */
     public function setSessionId($sessionId){
         $this->_session = $sessionId;
     }
@@ -112,7 +135,7 @@ class Superlogica_Api {
             curl_setopt($this->_curl, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($this->_curl, CURLOPT_SSL_VERIFYHOST, 0);
         }
-
+        
         $_params = array();
         $_params = $params;
         if (!$upload){
@@ -124,14 +147,28 @@ class Superlogica_Api {
             }
             $_params['json'] = json_encode(array('params' => $params ));
         }
-            
+        
+        if ( $this->_debugFile ){
+            curl_setopt($this->_curl, CURLOPT_VERBOSE, true);
+            $verbose = fopen( $this->_debugFile, 'a+' );
+            $paramsDebug = $params;
+            unset($paramsDebug[0]['password']);
+            fwrite($verbose, "\n\n\n<--------------->\n\n\nURL: ".($this->_url . '/' . $action)."\nParams: " . print_r($paramsDebug,true) . "\n\n" );
+            curl_setopt($this->_curl, CURLOPT_STDERR,  $verbose );
+        }
+        
         curl_setopt($this->_curl, CURLOPT_URL, $this->_url . '/' . $action);
         curl_setopt($this->_curl, CURLOPT_POSTFIELDS, $_params);
         if ($this->_session) {
             curl_setopt($this->_curl, CURLOPT_COOKIE, 'PHPSESSID=' . $this->_session);
             $_params['session'] = $this->_session;
         }
-        $result = curl_exec($this->_curl);              
+        $result = curl_exec($this->_curl);    
+        
+        if ( $this->_debugFile ){
+            fclose($verbose);
+        }
+        
         if (($result[0] == '{') or ($result[0] == '[')) {
             $result = json_decode($result, true);
             $result['url'] = $this->_url . '/' . $action;
@@ -251,6 +288,6 @@ class Superlogica_Api {
     public function isValid(){
         return ($this->_retorno) && ( $this->_retorno['status'] < 299 ) && ($this->_retorno['status'] != 0);
     }
-            
+
 }
 
